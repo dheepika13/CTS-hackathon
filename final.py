@@ -51,7 +51,7 @@ def set_bg_image(image_file):
 # Scrollable sections content
 def home_section():
     
-    bg_image_path = "sam.png"  # Update this path as needed
+    bg_image_path = "images/sam.png"  # Update this path as needed
     bg_image = Image.open(bg_image_path)
     bg_image_base64 = st_image_to_base64(bg_image)  # Converts image to base64
     
@@ -202,7 +202,7 @@ def home_section():
 
     
 def about_us_section():
-    image_path = "left.jpg"
+    image_path = "images/left.jpg"
     uploaded_image = Image.open(image_path)
     img_base64 = st_image_to_base64(uploaded_image)  # Convert image to base64
     
@@ -450,7 +450,7 @@ def services_section():
 
     
 def contact_page():
-    image_path = "contact.jpg"  # Update this path as needed
+    image_path = "images/contact.jpg"  # Update this path as needed
     bg_image = Image.open(image_path)
     bg_image_base64 = st_image_to_base64(bg_image)  # Convert image to base64
 
@@ -542,7 +542,7 @@ def contact_page():
     
 def signup_page():
     # Path to background image
-    bg_image_path = "background_signup.jpg"  # Path to your uploaded image
+    bg_image_path = "D:/CTS/background_signup.jpg"  # Path to your uploaded image
     bg_image = Image.open(bg_image_path)
     bg_image_base64 = st_image_to_base64(bg_image)  # Converts image to base64
 
@@ -662,46 +662,7 @@ def signup_page():
                     st.markdown(f"<div class='message success'>{result}</div>", unsafe_allow_html=True)
             else:
                 st.markdown("<div class='message error'>All fields are required.</div>", unsafe_allow_html=True)
-                
-def forgot_password_page():
-    st.title("Forgot Password")
-    st.write("Enter your email address to receive a password reset link.")
-    
-    email = st.text_input("Email")
-    submit_button = st.button("Send Reset Link")
-    
-    if submit_button:
-        # Add logic to send the reset link to the provided email
-        send_reset_link(email)
-        st.success("A password reset link has been sent to your email address.")
 
-def send_reset_link(email):
-    # Logic to generate a reset token, save it to the database, and send the email
-    pass
-
-def reset_password_page():
-    token = st.experimental_get_query_params().get("token", [""])[0]
-    
-    if not token:
-        st.error("Invalid or missing token.")
-        return
-    
-    st.title("Reset Password")
-    new_password = st.text_input("New Password", type='password')
-    confirm_password = st.text_input("Confirm Password", type='password')
-    submit_button = st.button("Reset Password")
-    
-    if submit_button:
-        if new_password == confirm_password:
-            # Add logic to verify the token and update the password in the database
-            reset_password(token, new_password)
-            st.success("Your password has been successfully reset.")
-        else:
-            st.error("Passwords do not match.")
-
-def reset_password(token, new_password):
-    # Logic to verify the token and update the password
-    pass
 
 # Helper function to convert image to base64 (used in the background image)
 def image_to_base64(image_path):
@@ -712,127 +673,24 @@ def display_login_as_page():
     st.title("Select Your Role")
     
     # Set the background image
-    set_bg_image('background_login.jpg')  # Replace with the path to your background image
+    set_bg_image('images/background_login.jpg')  # Replace with the path to your background image
     
     # Create three columns for aligning buttons
     col1, col2, col3 = st.columns(3)
 
     # Buttons for each role
     with col1:
-        st.image("nurse.png", use_column_width=True)
+        st.image("images/nurse.png", use_column_width=True)
         if st.button("Sign in as Nurse"):   
            st.query_params.from_dict({"page": "role_selection", "role": "nurse"})
 
     with col2:
-        st.image("doctor.png", use_column_width=True)
+        st.image("images/doctor.png", use_column_width=True)
         if st.button("Sign in as Doctor"):
            st.query_params.from_dict({"page": "role_selection", "role": "doctor"})
 
     with col3:
-        st.image("office assistant.png", use_column_width=True)
-        if st.button("Sign in as Admin"):
-           st.query_params.from_dict({"page": "role_selection", "role": "admin"})
-
-    # Display the login form based on the selected role
-    if "page" in st.session_state:
-        if st.session_state.page == "nurse_login":
-            display_nurse_login()
-        elif st.session_state.page == "doctor_login":
-            display_doctor_login()
-        elif st.session_state.page == "admin_login":
-            display_admin_login()
-        else:
-            st.write("Please select a role.")
-            
-# Function to set the background image
-def set_bg_image(image_file):
-    with open(image_file, "rb") as img_file:
-        encoded_string = base64.b64encode(img_file.read()).decode()
-        
-    st.markdown(
-        f"""
-        <style>
-        .stApp {{
-            background-image: url(data:image/jpeg;base64,{encoded_string});
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-        }}
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-
-
-def check_user_credentials(username, password, role):
-    snowflake_conn_params = {
-        'user': 'dheepika13',
-        'password': 'Dheepika@13',
-        'account': 'sx93925.ap-southeast-1',
-        'warehouse': 'COMPUTE_WH',
-        'database': 'LOGIN',
-        'schema': 'logindetails'
-    }
-    
-    try:
-        conn = snowflake.connector.connect(**snowflake_conn_params)
-        cursor = conn.cursor()
-        
-        # Check role first
-        role_query = """
-        SELECT * FROM users WHERE username=%s AND role=%s;
-        """
-        cursor.execute(role_query, (username, role))
-        role_result = cursor.fetchone()
-        
-        if not role_result:
-            return "Role does not match or user does not exist."
-        
-        # Check credentials if role is valid
-        credentials_query = """
-        SELECT * FROM users WHERE username=%s AND password=%s AND role=%s;
-        """
-        cursor.execute(credentials_query, (username, password, role))
-        credentials_result = cursor.fetchone()
-        
-        if credentials_result:
-            return True
-        else:
-            return "Invalid credentials, please try again."
-    except Exception as e:
-        return f"Error checking credentials: {e}"
-    finally:
-        cursor.close()
-        conn.close()
-
-# Function to convert image to base64
-def image_to_base64(image_path):
-    with open(image_path, "rb") as img_file:
-        return base64.b64encode(img_file.read()).decode("utf-8")
-
-def display_login_as_page():
-    st.title("Select Your Role")
-    
-    # Set the background image
-    set_bg_image('background_login.jpg')  # Replace with the path to your background image
-    
-    # Create three columns for aligning buttons
-    col1, col2, col3 = st.columns(3)
-
-    # Buttons for each role
-    with col1:
-        st.image("nurse.png", use_column_width=True)
-        if st.button("Sign in as Nurse"):   
-           st.query_params.from_dict({"page": "role_selection", "role": "nurse"})
-
-    with col2:
-        st.image("doctor.png", use_column_width=True)
-        if st.button("Sign in as Doctor"):
-           st.query_params.from_dict({"page": "role_selection", "role": "doctor"})
-
-    with col3:
-        st.image("office assistant.png", use_column_width=True)
+        st.image("images/office assistant.png", use_column_width=True)
         if st.button("Sign in as Admin"):
            st.query_params.from_dict({"page": "role_selection", "role": "admin"})
 
@@ -918,8 +776,8 @@ def display_nurse_login():
     st.title("Nurse Login")
     
     # Load images
-    bg_image_path = "D:/CTS/background_log.jpg"
-    icon_image_path = "D:/CTS/nurse.png"
+    bg_image_path = "images/background_log.jpg"
+    icon_image_path = "images/nurse.png"
 
     # Ensure images exist at the provided paths
     try:
@@ -1068,8 +926,8 @@ def display_doctor_login():
     st.title("Doctor Login")
     
     # Load images
-    bg_image_path = "background_log.jpg"
-    icon_image_path = "D:/CTS/doctor.png"
+    bg_image_path = "images/background_log.jpg"
+    icon_image_path = "images/doctor.png"
 
     # Ensure images exist at the provided paths
     try:
@@ -1254,10 +1112,10 @@ def admin_choice():
         )
 
     # Set the background image
-    set_bg_image("D:/CTS/new_pic.jpg")
+    set_bg_image("images/new_pic.jpg")
 
     # Main function for the app
-    st.title("Dashboard and Chat Interface")
+    st.title("Admin Panel and Chat Interface")
 
     # CSS for hover effect, text boxes, and buttons
     st.markdown(
@@ -1313,14 +1171,14 @@ def admin_choice():
     with st.container():
         # Dashboard column
         with col1:
-            st.header("Dashboard")
+            st.header("Admin Panel")
 
             # Add dashboard image and text box with hover effect
             st.markdown(
                 f"""
                 <div class="hover-container">
-                    <img src="data:image/png;base64,{image_to_base64("D:/CTS/dashboard.jpg")}" alt="Dashboard Image">
-                    <p>Dashboard</p>
+                    <img src="data:image/png;base64,{image_to_base64("images/admin.jpg")}" alt="Dashboard Image">
+                    <p>Admin panel</p>
                 </div>
                 """,
                 unsafe_allow_html=True
@@ -1349,7 +1207,7 @@ def admin_choice():
             st.markdown(
                 f"""
                 <div class="hover-container">
-                    <img src="data:image/png;base64,{image_to_base64("D:/CTS/chat.jpg")}" alt="Chat Interface Image">
+                    <img src="data:image/png;base64,{image_to_base64("images/chat.jpg")}" alt="Chat Interface Image">
                     <p>Chat Interface</p>
                 </div>
                 """,
@@ -1376,8 +1234,8 @@ def display_admin_login():
     st.title("Admin Login")
 
     # Load images
-    bg_image_path = "background_log.jpg"
-    icon_image_path = "nurse.png"
+    bg_image_path = "images/background_log.jpg"
+    icon_image_path = "images/office assistant.png"
     
     bg_image = Image.open(bg_image_path)
     icon_image = Image.open(icon_image_path)
@@ -1679,6 +1537,9 @@ if page == "home":
     services_section()
     contact_page()
     footer()
+    
+elif page == "signup":
+    signup_page()
 
 elif page == "signin":
     display_login_as_page()  # Show login page with role options (e.g., Nurse, Doctor, Admin)
